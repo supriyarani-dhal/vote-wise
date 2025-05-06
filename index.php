@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>vote wise login</title>
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="assets/css/login.css">
+	<link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+	<div class="container h-100">
+		<div class="d-flex justify-content-center h-100">
+			<div class="user_card" style="height: 450px;">
+				<div class="d-flex justify-content-center">
+					<div class="brand_logo_container">
+						<img src="assets/images/logo.gif" class="brand_logo" alt="Logo">
+					</div>
+				</div>
+
+				<?php
+				if (isset($_GET['sign-up'])) {
+					?>
+					<div class="d-flex justify-content-center form_container">
+						<form method="POST">
+							<div class="input-group mb-2">
+								<div class="input-group-append">
+									<span class="input-group-text"><i class="fas fa-user"></i></span>
+								</div>
+								<input type="text" name="su_username" class="form-control input_user" placeholder="username"
+									required>
+							</div>
+							<div class="input-group mb-2">
+								<div class="input-group-append">
+									<span class="input-group-text"><i class="fas fa-user"></i></span>
+								</div>
+								<input type="text" name="su_contact" class="form-control input_number"
+									placeholder="contact number" required>
+							</div>
+							<div class="input-group mb-2">
+								<div class="input-group-append">
+									<span class="input-group-text"><i class="fas fa-key"></i></span>
+								</div>
+								<input type="password" name="su_password" class="form-control input_pass"
+									placeholder="password" required>
+							</div>
+							<div class="input-group mb-2">
+								<div class="input-group-append">
+									<span class="input-group-text"><i class="fas fa-key"></i></span>
+								</div>
+								<input type="password" name="su_retype_password" class="form-control input_pass"
+									placeholder="Re-enter password" required>
+							</div>
+							<div class="form-group">
+								<div class="custom-control custom-checkbox">
+									<input type="checkbox" class="custom-control-input" id="customControlInline">
+									<label class="custom-control-label text-white" for="customControlInline">Remember
+										me</label>
+								</div>
+							</div>
+							<div class="d-flex justify-content-center mt-2 login_container">
+								<button type="submit" name="su_button" class="btn login_btn">Sign Up</button>
+							</div>
+						</form>
+					</div>
+
+					<div class="mt-3">
+						<div class="d-flex justify-content-center links text-white">
+							Already have an account? <a href="index.php" class="ml-2 text-white">Sign In</a>
+						</div>
+					</div>
+					<?php
+				} else {
+					?>
+					<div class="d-flex justify-content-center form_container">
+						<form>
+							<div class="input-group mb-3">
+								<div class="input-group-append">
+									<span class="input-group-text"><i class="fas fa-user"></i></span>
+								</div>
+								<input type="text" name="si_username" class="form-control input_user" placeholder="username"
+									required>
+							</div>
+							<div class="input-group mb-2">
+								<div class="input-group-append">
+									<span class="input-group-text"><i class="fas fa-key"></i></span>
+								</div>
+								<input type="password" name="si_password" class="form-control input_pass"
+									placeholder="password" required>
+							</div>
+							<div class="form-group">
+								<div class="custom-control custom-checkbox">
+									<input type="checkbox" class="custom-control-input" id="customControlInline">
+									<label class="custom-control-label text-white" for="customControlInline">Remember
+										me</label>
+								</div>
+							</div>
+							<div class="d-flex justify-content-center mt-5 login_container">
+								<button type="button" name="button" class="btn login_btn">Login</button>
+							</div>
+						</form>
+					</div>
+
+					<div class="mt-4">
+						<div class="d-flex justify-content-center links text-white">
+							Don't have an account? <a href="?sign-up=1" class="ml-2 text-white">Sign Up</a>
+						</div>
+						<div class="d-flex justify-content-center links">
+							<a href="#" class="text-white">Forgot your password?</a>
+						</div>
+					</div>
+					<?php
+				}
+				?>
+
+				<?php
+				if (isset($_GET['registered'])) {
+					echo "<span class='text-success text-center'>✅ Registration successful!</span>";
+				} else if (isset($_GET['invalid'])) {
+					echo "<span class='text-danger text-center'>❌ Passwords does not match!</span>";
+				} else if (isset($_GET['error'])) {
+					echo "<span class='text-danger text-center'>❌ Registration failed!</span>";
+				}
+				?>
+
+			</div>
+		</div>
+	</div>
+</body>
+
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/jquery.min.js"></script>
+
+</html>
+
+<?php
+require_once "admin/inc/config.php";
+if (isset($_POST['su_button'])) {
+	$su_username = $_POST['su_username'];
+	$su_contact = $_POST['su_contact'];
+	$su_password = $_POST['su_password'];
+	$su_retype_password = $_POST['su_retype_password'];
+	$user_role = "Voter";
+
+	// Hash the password for security
+	$hashedPassword = password_hash($su_password, PASSWORD_DEFAULT);
+
+
+	if ($su_password == $su_retype_password) {
+		try {
+			$sql = "INSERT INTO users(username, contact, password, user_role) VALUES(:username, :contact, :password, :user_role)";
+			$stmt = $pdo->prepare($sql);
+			$stmt->execute([
+				":username" => $su_username,
+				":contact" => $su_contact,
+				":password" => $hashedPassword,
+				":user_role" => $user_role
+			]);
+
+			echo "<script>location.assign(\"index.php?sign-up=1&registered=1\");</script>";
+
+		} catch (PDOException $e) {
+			echo "<script>location.assign(\"index.php?sign-up=1&error=1\");</script>";
+		}
+
+	} else {
+
+		echo "<script>location.assign(\"index.php?sign-up=1&invalid=1\");</script>";
+
+	}
+
+
+}
+?>
