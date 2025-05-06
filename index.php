@@ -73,13 +73,13 @@
 				} else {
 					?>
 					<div class="d-flex justify-content-center form_container">
-						<form>
+						<form method="POST">
 							<div class="input-group mb-3">
 								<div class="input-group-append">
 									<span class="input-group-text"><i class="fas fa-user"></i></span>
 								</div>
-								<input type="text" name="si_username" class="form-control input_user" placeholder="username"
-									required>
+								<input type="text" name="si_contact" class="form-control input_user"
+									placeholder="contact number" required>
 							</div>
 							<div class="input-group mb-2">
 								<div class="input-group-append">
@@ -96,7 +96,7 @@
 								</div>
 							</div>
 							<div class="d-flex justify-content-center mt-5 login_container">
-								<button type="button" name="button" class="btn login_btn">Login</button>
+								<button type="submit" name="si_button" class="btn login_btn">Login</button>
 							</div>
 						</form>
 					</div>
@@ -120,7 +120,12 @@
 					echo "<span class='text-danger text-center'>❌ Passwords does not match!</span>";
 				} else if (isset($_GET['error'])) {
 					echo "<span class='text-danger text-center'>❌ Registration failed!</span>";
+				} else if (isset($_GET['not_found'])) {
+					echo "<span class='text-warning text-center'>⚠ Invalid credentials! Please try again</span>";
+				} else if (isset($_GET['not_registered'])) {
+					echo "<span class='text-danger text-center'>❌ User not registered!</span>";
 				}
+
 				?>
 
 			</div>
@@ -170,5 +175,40 @@ if (isset($_POST['su_button'])) {
 	}
 
 
+} else if (isset($_POST['si_button'])) {
+	$si_contact = $_POST['si_contact'];
+	$si_password = $_POST['si_password'];
+
+	try {
+		$sql = "SELECT * FROM users WHERE contact = :contact";
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute([
+			":contact" => $si_contact,
+		]);
+
+		$user = $stmt->fetch();
+
+		if (!$user) {
+			echo "<script>location.assign(\"index.php?not_registered=1\");</script>";
+		}
+
+		if ($user && password_verify($si_password, $user['password'])) {
+			session_start();
+
+			$_SESSION['user_role'] = $user['user_role'];
+			$_SESSION['username'] = $user['username'];
+
+			if ($user['user_role'] == "Admin") {
+				echo "<script>location.assign(\"admin/index.php\");</script>";
+			} else {
+				echo "<script>location.assign(\"voter/index.php\");</script>";
+			}
+
+		} else {
+			echo "<script>location.assign(\"index.php?not_found=1\");</script>";
+		}
+	} catch (PDOException $e) {
+		echo "<script>location.assign(\"index.php?not_registered=1\");</script>";
+	}
 }
 ?>
