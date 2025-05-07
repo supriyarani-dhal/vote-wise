@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>vote wise login</title>
+	<title>Authentication- vote wise</title>
 	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
 	<link rel="stylesheet" href="assets/css/login.css">
 	<link rel="stylesheet" href="assets/css/style.css">
@@ -199,8 +199,10 @@ if (isset($_POST['su_button'])) {
 			$_SESSION['username'] = $user['username'];
 
 			if ($user['user_role'] == "Admin") {
-				echo "<script>location.assign(\"admin/index.php\");</script>";
+				$_SESSION['key'] = "AdminKey";
+				echo "<script>location.assign(\"admin/index.php?home_page=1\");</script>";
 			} else {
+				$_SESSION['key'] = "VoterKey";
 				echo "<script>location.assign(\"voter/index.php\");</script>";
 			}
 

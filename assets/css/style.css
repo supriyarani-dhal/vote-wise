@@ -1,7 +1,23 @@
-.text-white{
+.text-white {
   color: #fff !important;
 }
 
-.bg-white{
+.bg-white {
   background-color: #fff !important;
+}
+
+.text-black {
+  color: #000 !important;
+}
+
+.bg-black {
+  background-color: #000 !important;
+}
+
+.text-green {
+  background-color: #68c230 !important;
+}
+
+.bg-green {
+  background-color: #68c230 !important;
 }
