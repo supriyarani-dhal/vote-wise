@@ -23,11 +23,17 @@ $sql = "SELECT * FROM elections ORDER BY starting_date DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+//get all the candidates from the database
+$sql = "SELECT * FROM candidates";
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$candidates = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 
 <div class="row my-3">
-    <div class="col-4">
+    <div class="col-3">
         <h3>Add New Candidate</h3>
         <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
@@ -35,11 +41,26 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <option value="">Select Election</option>
                     <?php
                     if (count($elections) > 0) {
-                        foreach ($elections as $election) { ?>
-                            <option value="<?= htmlspecialchars($election['id']) ?>">
-                                <?= htmlspecialchars($election['election_topic']) ?>
-                            </option>
-                        <?php }
+                        foreach ($elections as $election) {
+                            $allowed_candidates = $election['no_of_candidates'];
+                            $sql = "SELECT * FROM candidates WHERE election_id = " . $election['id'];
+                            $stmt = $pdo->prepare($sql);
+                            $stmt->execute();
+                            $candidates_count = $stmt->rowCount();
+
+                            if ($candidates_count < $allowed_candidates) {
+                                ?>
+                                <option value="<?= htmlspecialchars($election['id']) ?>">
+                                    <?= htmlspecialchars($election['election_topic']) ?>
+                                </option>
+                            <?php
+                            } else { ?>
+                                <option value="<?= htmlspecialchars($election['id']) ?>" disabled>
+                                    <?= htmlspecialchars($election['election_topic']) ?> (Full)
+                                </option>
+                            <?php
+                            }
+                        }
                     } else {
                         echo "<option value=''>Please add an election first</option>";
                     } ?>
@@ -58,9 +79,9 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </form>
     </div>
 
-    <div class="col-8">
+    <div class="col-9">
         <h3>Candidate Details</h3>
-        <?php if (count($elections) > 0) { ?>
+        <?php if (count($candidates) > 0) { ?>
             <table class="table">
                 <thead>
                     <tr>
@@ -74,14 +95,21 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </thead>
                 <tbody>
                     <?php
-                    foreach ($elections as $row): ?>
+                    foreach ($candidates as $row):
+                        $sql = "SELECT election_topic FROM elections WHERE id = " . $row['election_id'];
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->execute();
+                        $election_name = $stmt->fetch(PDO::FETCH_ASSOC);
+                        ?>
                         <tr>
                             <td><?= htmlspecialchars($row['id']) ?></td>
-                            <td><?= htmlspecialchars($row['election_topic']) ?></td>
-                            <td><?= htmlspecialchars($row['no_of_candidates']) ?></td>
-                            <td><?= htmlspecialchars($row['starting_date']) ?></td>
-                            <td><?= htmlspecialchars($row['ending_date']) ?></td>
-                            <td><?= htmlspecialchars($row['status']) ?></td>
+                            <td><img src="<?= $row['candidate_photo']; ?>" alt="Candidate Symbol" class="candidate_symbol" />
+                            </td>
+                            <td><?= htmlspecialchars($row['candidate_name']) ?></td>
+                            <td style="width: 40%;"><?= htmlspecialchars($row['candidate_details']) ?></td>
+                            <td>
+                                <?= htmlspecialchars($election_name['election_topic']) ?>
+                            </td>
                             <td>
                                 <a href="#" class="btn btn-warning btn-sm">Edit</a>
                                 <a href="#" class="btn btn-danger btn-sm">Delete</a>
@@ -92,8 +120,8 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </tbody>
             </table>
         <?php } else {
-            echo "<h3 class='text-center text-danger'>
-                    No elections have been added yet.
+            echo "<h3 class='text-center text-danger my-5'>
+                    No Candidates have been added yet. Please add a candidate.
                 </h3>";
         } ?>
     </div>

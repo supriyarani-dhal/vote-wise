@@ -38,7 +38,7 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <div class="col-8">
-        <h3>Upcoming Elections</h3>
+        <h3>Election Details</h3>
         <?php if (count($elections) > 0) { ?>
             <table class="table">
                 <thead>
@@ -72,7 +72,7 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </tbody>
             </table>
         <?php } else {
-            echo "<h3 class='text-center text-danger'>
+            echo "<h3 class='text-center text-danger my-5'>
                     No elections have been added yet.
                 </h3>";
         } ?>
