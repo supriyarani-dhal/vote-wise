@@ -197,6 +197,7 @@ if (isset($_POST['su_button'])) {
 
 			$_SESSION['user_role'] = $user['user_role'];
 			$_SESSION['username'] = $user['username'];
+			$_SESSION['user_id'] = $user['id'];
 
 			if ($user['user_role'] == "Admin") {
 				$_SESSION['key'] = "AdminKey";
