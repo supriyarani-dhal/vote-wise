@@ -24,7 +24,9 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </thead>
                 <tbody>
                     <?php
-                    foreach ($elections as $row): ?>
+                    foreach ($elections as $row):
+                        $election_id = $row['id'];
+                        ?>
                         <tr>
                             <td><?= htmlspecialchars($row['id']) ?></td>
                             <td><?= htmlspecialchars($row['election_topic']) ?></td>
@@ -33,7 +35,8 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= htmlspecialchars($row['ending_date']) ?></td>
                             <td><?= htmlspecialchars($row['status']) ?></td>
                             <td>
-                                <a href="#" class="btn btn-success btn-sm">View Results</a>
+                                <a href="index.php?viewResults=<?= $election_id ?>" class="btn btn-success btn-sm">View
+                                    Results</a>
                             </td>
                         </tr>
                     <?php endforeach;

@@ -3,6 +3,18 @@ if (isset($_GET['added'])) {
     echo "<div class=\"alert alert-success my-3\" role=\"alert\">
             Election has been added successfully!
         </div>";
+} else if (isset($_GET['deleteElection'])) {
+
+    $election_id = $_GET['deleteElection'];
+    $sql = 'DELETE FROM elections WHERE id = :election_id';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ":election_id" => $election_id,
+    ]);
+
+    echo "<div class=\"alert alert-success my-3\" role=\"alert\">
+            Election has been deleted successfully!
+        </div>";
 }
 
 
@@ -63,8 +75,8 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= htmlspecialchars($row['ending_date']) ?></td>
                             <td><?= htmlspecialchars($row['status']) ?></td>
                             <td>
-                                <a href="#" class="btn btn-warning btn-sm">Edit</a>
-                                <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                                <button href="#" class="btn btn-danger btn-sm"
+                                    onClick="handleDelete(<?= $row['id'] ?>)">Delete</button>
                             </td>
                         </tr>
                     <?php endforeach;
@@ -79,6 +91,13 @@ $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
+<script>
+    const handleDelete = (id) => {
+        if (confirm("Are you sure you want to delete this election?")) {
+            location.assign(`index.php?deleteElection=${id}`);
+        }
+    }
+</script>
 
 <?php
 if (isset($_POST['add_election_btn'])) {
@@ -91,7 +110,7 @@ if (isset($_POST['add_election_btn'])) {
 
     $date_diff = date_diff(date_create($created_date), date_create($starting_date));
 
-    if ($date_diff->format("%R%a") > 0) {
+    if ((int) $date_diff->format("%R%a") > 0) {
         $status = "Upcoming";
     } else {
         $status = "Ongoing";

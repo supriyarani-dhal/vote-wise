@@ -15,6 +15,18 @@ if (isset($_GET['added'])) {
     echo "<div class=\"alert alert-danger my-3\" role=\"alert\">
             File upload failed. Please try again.
         </div>";
+} else if (isset($_GET['deleteCandidate'])) {
+
+    $candidate_id = $_GET['deleteCandidate'];
+    $sql = 'DELETE FROM candidates WHERE id = :candidate_id';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ":candidate_id" => $candidate_id,
+    ]);
+
+    echo "<div class=\"alert alert-success my-3\" role=\"alert\">
+            Candidate has been deleted successfully!
+        </div>";
 }
 
 
@@ -53,12 +65,12 @@ $candidates = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <option value="<?= htmlspecialchars($election['id']) ?>">
                                     <?= htmlspecialchars($election['election_topic']) ?>
                                 </option>
-                            <?php
+                                <?php
                             } else { ?>
                                 <option value="<?= htmlspecialchars($election['id']) ?>" disabled>
                                     <?= htmlspecialchars($election['election_topic']) ?> (Full)
                                 </option>
-                            <?php
+                                <?php
                             }
                         }
                     } else {
@@ -111,8 +123,8 @@ $candidates = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <?= htmlspecialchars($election_name['election_topic']) ?>
                             </td>
                             <td>
-                                <a href="#" class="btn btn-warning btn-sm">Edit</a>
-                                <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                                <button href="#" class="btn btn-danger btn-sm"
+                                    onClick="handleDelete(<?= $row['id'] ?>)">Delete</button>
                             </td>
                         </tr>
                     <?php endforeach;
@@ -127,6 +139,13 @@ $candidates = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
+<script>
+    const handleDelete = (id) => {
+        if (confirm("Are you sure you want to delete this candidate?")) {
+            location.assign(`index.php?deleteCandidate=${id}`);
+        }
+    }
+</script>
 
 <?php
 if (isset($_POST['add_candidate_btn'])) {

@@ -18,17 +18,17 @@ if (isset($_GET['voteCasted'])) {
         <h3>VOTERS PANEL</h3>
 
         <?php
-        // Fetch ongoing elections
-        $sql = "SELECT * FROM elections WHERE status = 'ongoing'";
+        // Fetch Ongoing elections
+        $sql = "SELECT * FROM elections WHERE status = 'Ongoing'";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
-        $ongoingElections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $OngoingElections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $totalActiveElections = count($ongoingElections);
+        $totalOngoingElections = count($OngoingElections);
 
 
-        if ($totalActiveElections > 0) {
-            foreach ($ongoingElections as $election) {
+        if ($totalOngoingElections > 0) {
+            foreach ($OngoingElections as $election) {
                 $electionTopic = htmlspecialchars($election['election_topic']);
                 $electionId = htmlspecialchars($election['id']);
 
@@ -89,18 +89,27 @@ if (isset($_GET['voteCasted'])) {
 
                                     <?php
                                     // Check if the user has already casted a vote
-                                    $sql = "SELECT * FROM votings WHERE election_id = :election_id AND candidate_id = :candidate_id AND voter_id = :voter_id";
+                                    $sql = "SELECT * FROM votings WHERE election_id = :election_id AND voter_id = :voter_id";
                                     $stmt = $pdo->prepare($sql);
                                     $stmt->execute([
                                         ':election_id' => $electionId,
-                                        ':candidate_id' => $candidateId,
                                         ':voter_id' => $_SESSION['user_id']
                                     ]);
                                     $alreadyVote = $stmt->fetch(PDO::FETCH_ASSOC);
                                     if ($alreadyVote) {
-                                        ?> <button class="btn btn-light" disabled><img src="../assets/images/voted.png"
-                                                alt="" width="40"></button>
-                                        <?php
+
+                                        $voteToCandidate = $alreadyVote['candidate_id'];
+
+                                        // Check if the user has already casted a vote for this candidate
+                                        if ($voteToCandidate == $candidateId) {
+                                            ?> <button class="btn btn-light" disabled><img
+                                                    src="../assets/images/voted.png" alt="" width="40"></button>
+                                            <?php
+                                        } else {
+                                            ?> <button class="btn btn-primary btn-disabled" disabled> Voted </button>
+                                            <?php
+                                        }
+
                                     } else {
                                         ?>
                                         <button class="btn btn-primary"
@@ -121,7 +130,7 @@ if (isset($_GET['voteCasted'])) {
 
         } else {
             echo "<h3 class='text-center text-danger my-5'>
-            No elections are currently ongoing.
+            No elections are currently Ongoing.
             </h3>";
         }
         ?>

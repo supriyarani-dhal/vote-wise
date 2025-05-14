@@ -8,6 +8,8 @@ if (isset($_GET['home_page'])) {
     include 'inc/addElection.php';
 } else if (isset($_GET['add_candidate'])) {
     include 'inc/addCandidate.php';
+} else if (isset($_GET['viewResults'])) {
+    include 'inc/viewResults.php';
 }
 ?>
 
