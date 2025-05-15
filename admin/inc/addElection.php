@@ -3,6 +3,10 @@ if (isset($_GET['added'])) {
     echo "<div class=\"alert alert-success my-3\" role=\"alert\">
             Election has been added successfully!
         </div>";
+} else if (isset($_GET["can't_added"])) {
+    echo "<div class=\"alert alert-warning my-3\" role=\"alert\">
+            You can't add a Completed Election!
+        </div>";
 } else if (isset($_GET['deleteElection'])) {
 
     $election_id = $_GET['deleteElection'];
@@ -116,22 +120,27 @@ if (isset($_POST['add_election_btn'])) {
         $status = "Ongoing";
     }
 
-    try {
-        $sql = "INSERT INTO elections (election_topic, no_of_candidates, starting_date, ending_date,status, created_by, created_date) VALUES (:election_topic, :no_of_candidates, :starting_date, :ending_date, :status,:created_by, :created_date)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ":election_topic" => $election_topic,
-            ":no_of_candidates" => $no_of_candidates,
-            ":starting_date" => $starting_date,
-            ":ending_date" => $ending_date,
-            ":status" => $status,
-            ":created_by" => $created_by,
-            ":created_date" => $created_date
-        ]);
+    if (date_diff(date_create($created_date), date_create($ending_date))->format("%R%a") < 0) {
+        echo "<script>location.assign(\"index.php?add_election=1&can't_added=1\");</script>";
+    } else {
 
-        echo "<script>location.assign(\"index.php?add_election=1&added=1\");</script>";
-    } catch (\Throwable $th) {
-        echo "" . $th->getMessage() . "";
+        try {
+            $sql = "INSERT INTO elections (election_topic, no_of_candidates, starting_date, ending_date,status, created_by, created_date) VALUES (:election_topic, :no_of_candidates, :starting_date, :ending_date, :status,:created_by, :created_date)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ":election_topic" => $election_topic,
+                ":no_of_candidates" => $no_of_candidates,
+                ":starting_date" => $starting_date,
+                ":ending_date" => $ending_date,
+                ":status" => $status,
+                ":created_by" => $created_by,
+                ":created_date" => $created_date
+            ]);
+
+            echo "<script>location.assign(\"index.php?add_election=1&added=1\");</script>";
+        } catch (\Throwable $th) {
+            echo "" . $th->getMessage() . "";
+        }
     }
 
 }

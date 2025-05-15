@@ -1,9 +1,46 @@
 <?php
 //get all the elections from the database
-$sql = "SELECT * FROM elections ORDER BY starting_date DESC";
+$sql = "SELECT * FROM elections";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+//update the status according to the date
+
+foreach ($elections as $election) {
+    $starting_date = $election['starting_date'];
+    $ending_date = $election['ending_date'];
+    $curr_date = date('Y-m-d');
+    $id = $election['id'];
+    $status = $election['status'];
+
+    if ($status == 'Ongoing') {
+        $date_diff = date_diff(date_create($curr_date), date_create($ending_date));
+
+        if ((int) $date_diff->format("%R%a") < 0) {
+            $status = "Completed";
+            $sql = "UPDATE elections SET status = :status WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':status' => $status,
+                ':id' => $id
+            ]);
+        }
+    } else {
+        $date_diff = date_diff(date_create($curr_date), date_create($starting_date));
+
+        if ((int) $date_diff->format("%R%a") <= 0) {
+            $status = "Ongoing";
+            $sql = "UPDATE elections SET status = :status WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':status' => $status,
+                ':id' => $id
+            ]);
+        }
+    }
+}
 ?>
 
 <div class="row my-3">

@@ -1,46 +1,5 @@
 <?php
 require_once "admin/inc/config.php";
-
-//update the status according to the date
-$sql = "SELECT * FROM elections";
-$stmt = $pdo->prepare($sql);
-$stmt->execute();
-
-$elections = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($elections as $election) {
-	$starting_date = $election['starting_date'];
-	$ending_date = $election['ending_date'];
-	$curr_date = date('Y-m-d');
-	$id = $election['id'];
-	$status = $election['status'];
-
-	if ($status == 'Ongoing') {
-		$date_diff = date_diff(date_create($curr_date), date_create($ending_date));
-
-		if ((int) $date_diff->format("%R%a") < 0) {
-			$status = "Completed";
-			$sql = "UPDATE elections SET status = :status WHERE id = :id";
-			$stmt = $pdo->prepare($sql);
-			$stmt->execute([
-				':status' => $status,
-				':id' => $id
-			]);
-		}
-	} else {
-		$date_diff = date_diff(date_create($curr_date), date_create($starting_date));
-
-		if ((int) $date_diff->format("%R%a") <= 0) {
-			$status = "Ongoing";
-			$sql = "UPDATE elections SET status = :status WHERE id = :id";
-			$stmt = $pdo->prepare($sql);
-			$stmt->execute([
-				':status' => $status,
-				':id' => $id
-			]);
-		}
-	}
-}
 ?>
 
 <!DOCTYPE html>
@@ -96,14 +55,15 @@ foreach ($elections as $election) {
 								<input type="password" name="su_retype_password" class="form-control input_pass"
 									placeholder="Re-enter password" required>
 							</div>
-							<div class="form-group">
-								<div class="custom-control custom-checkbox">
-									<input type="checkbox" class="custom-control-input" id="customControlInline">
-									<label class="custom-control-label text-white" for="customControlInline">Remember
-										me</label>
+							<div class="input-group mb-2">
+								<div class="input-group-append">
+									<span class="input-group-text"><i class="fas fa-key"></i></span>
 								</div>
+								<input type="text" name="su_user_role" class="form-control input_pass"
+									placeholder="user role" required>
 							</div>
-							<div class="d-flex justify-content-center mt-2 login_container">
+
+							<div class="d-flex justify-content-center mt-4 login_container">
 								<button type="submit" name="su_button" class="btn login_btn">Sign Up</button>
 							</div>
 						</form>
@@ -190,7 +150,7 @@ if (isset($_POST['su_button'])) {
 	$su_contact = $_POST['su_contact'];
 	$su_password = $_POST['su_password'];
 	$su_retype_password = $_POST['su_retype_password'];
-	$user_role = "Voter";
+	$user_role = $_POST['su_user_role'];
 
 	// Hash the password for security
 	$hashedPassword = password_hash($su_password, PASSWORD_DEFAULT);
